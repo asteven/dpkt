@@ -1,0 +1,25 @@
+
+Original author
+---------------
+
+Dug Song <dugsong@monkey.org>
+
+
+Contributors
+------------
+
+the grugq <thegrugq@gmail.com>
+	rtp.py
+
+Tim Newsham <newsham@lava.net>
+	IPv6 bugfixing and improvements
+
+Robert Stone <otaku@monkey.org>
+	netflow.py
+	qq.py
+
+Thomas Taranowski <thomastaranowski@yahoo.com>
+	dnet IP checksum bug on i386
+
+Tim Yardley <yardley@gmail.com>
+	DHCP definitions
