@@ -9,14 +9,16 @@ Contributors
 ------------
 
 the grugq <thegrugq@gmail.com>
-	rtp.py
+	better RTP module
 
 Tim Newsham <newsham@lava.net>
 	IPv6 bugfixing and improvements
 
+Jon Oberheide <jon@oberheide.org>
+	STUN, H.225, and TPKT modules
+
 Robert Stone <otaku@monkey.org>
-	netflow.py
-	qq.py
+	Netflow and QQ modules
 
 Thomas Taranowski <thomastaranowski@yahoo.com>
 	dnet IP checksum bug on i386
