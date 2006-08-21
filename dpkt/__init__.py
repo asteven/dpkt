@@ -34,6 +34,7 @@ import ipx
 import loopback
 import netbios
 import netflow
+import ntp
 import ospf
 import pcap
 import pim
