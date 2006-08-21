@@ -16,6 +16,7 @@ import arp
 import asn1
 import cdp
 import dhcp
+import diameter
 import dns
 import dtp
 import esp
