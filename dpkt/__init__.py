@@ -48,6 +48,7 @@ import rip
 import rpc
 import rtp
 import sccp
+import sctp
 import sip
 import sll
 import smb
