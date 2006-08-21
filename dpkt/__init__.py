@@ -43,6 +43,7 @@ import ppp
 import pppoe
 import qq
 import radius
+import rip
 import rpc
 import rtp
 import sccp
