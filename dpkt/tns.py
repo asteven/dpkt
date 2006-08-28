@@ -17,8 +17,8 @@ class TNS(dpkt.Packet):
         dpkt.Packet.unpack(self, buf)
         n = self.length - self.__hdr_len__
         if n > len(self.data):
-            raise dpkt.UnpackError('short message (missing %d bytes)' %
-                                   (n - len(self.data)))
+            raise dpkt.NeedData('short message (missing %d bytes)' %
+                                (n - len(self.data)))
         self.msg = self.data[:n]
         self.data = self.data[n:]
 

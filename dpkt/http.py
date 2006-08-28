@@ -11,7 +11,7 @@ def parse_headers(f):
     while 1:
         line = f.readline()
         if not line:
-            raise dpkt.UnpackError('premature end of headers')
+            raise dpkt.NeedData('premature end of headers')
         line = line.strip()
         if not line:
             break
@@ -43,13 +43,13 @@ def parse_body(f, headers):
             else:
                 break
         if not found_end:
-            raise dpkt.UnpackError('premature end of chunked body')
+            raise dpkt.NeedData('premature end of chunked body')
         body = ''.join(l)
     elif 'content-length' in headers:
         n = int(headers['content-length'])
         body = f.read(n)
         if len(body) != n:
-            raise dpkt.UnpackError('short body (missing %d bytes)' % (n - len(body)))
+            raise dpkt.NeedData('short body (missing %d bytes)' % (n - len(body)))
     elif 'content-type' in headers:
         body = f.read()
     else:

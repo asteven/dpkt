@@ -1,3 +1,4 @@
+
 # $Id: dpkt.py 372 2006-06-06 12:19:35Z dugsong $
 
 """Simple packet creation and parsing."""
@@ -6,6 +7,7 @@ import copy, itertools, struct
 
 class Error(Exception): pass
 class UnpackError(Error): pass
+class NeedData(UnpackError): pass
 class PackError(Error): pass
 
 class _MetaPacket(type):
@@ -66,6 +68,8 @@ class Packet(object):
             try:
                 self.unpack(args[0])
             except struct.error:
+                if len(args[0]) < self.__hdr_len__:
+                    raise NeedData
                 raise UnpackError('invalid %s: %r' %
                                   (self.__class__.__name__, args[0]))
         else:

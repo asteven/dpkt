@@ -187,7 +187,7 @@ class SCCP(dpkt.Packet):
         dpkt.Packet.unpack(self, buf)
         n = self.len - 4
         if n > len(self.data):
-            raise dpkt.UnpackError('not enough data')
+            raise dpkt.NeedData('not enough data')
         self.msg, self.data = self.data[:n], self.data[n:]
         try:
             p = self._msgsw[self.msgid](self.msg)
