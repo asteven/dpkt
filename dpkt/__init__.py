@@ -14,6 +14,7 @@ import ah
 import aim
 import arp
 import asn1
+import bgp
 import cdp
 import dhcp
 import diameter
