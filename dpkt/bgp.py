@@ -55,7 +55,7 @@ NO_PEER				= 0xffffff04
 
 # Common AFI types
 AFI_IPV4			= 1
-AFI_IPv6			= 2
+AFI_IPV6			= 2
 
 # Multiprotocol SAFI types
 SAFI_UNICAST			= 1
@@ -205,7 +205,7 @@ class BGP(dpkt.Packet):
             self.data = self.data[2:]
             l = []
             while wlen > 0:
-                route = Route(self.data)
+                route = RouteIPV4(self.data)
                 self.data = self.data[len(route):]
                 wlen -= len(route)
                 l.append(route)
@@ -225,7 +225,7 @@ class BGP(dpkt.Packet):
             # Announced Routes
             l = []
             while self.data:
-                route = Route(self.data)
+                route = RouteIPV4(self.data)
                 self.data = self.data[len(route):]
                 l.append(route)
             self.announced = l
@@ -486,6 +486,13 @@ class BGP(dpkt.Packet):
                         l.append(snpa)
                     self.snpas = l
 
+                    if self.afi == AFI_IPV4:
+                        Route = RouteIPV4
+                    elif self.afi == AFI_IPV6:
+                        Route = RouteIPV6
+                    else:
+                        Route = RouteGeneric
+
                     # Announced Routes
                     l = []
                     while self.data:
@@ -525,6 +532,13 @@ class BGP(dpkt.Packet):
 
                 def unpack(self, buf):
                     dpkt.Packet.unpack(self, buf)
+
+                    if self.afi == AFI_IPV4:
+                        Route = RouteIPV4
+                    elif self.afi == AFI_IPV6:
+                        Route = RouteIPV6
+                    else:
+                        Route = RouteGeneric
 
                     # Withdrawn Routes
                     l = []
@@ -573,7 +587,7 @@ class BGP(dpkt.Packet):
             ) 
 
 
-class Route(dpkt.Packet):
+class RouteGeneric(dpkt.Packet):
     __hdr__ = (
         ('len', 'B', 0),
         )
@@ -581,6 +595,44 @@ class Route(dpkt.Packet):
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
         self.data = self.prefix = self.data[:(self.len + 7) / 8]
+
+class RouteIPV4(dpkt.Packet):
+    __hdr__ = (
+        ('len', 'B', 0),
+        )
+
+    def unpack(self, buf):
+        dpkt.Packet.unpack(self, buf)
+        tmp = self.data[:(self.len + 7) / 8]
+        tmp += (4 - len(tmp)) * '\x00'
+        self.data = self.prefix = tmp
+
+    def __len__(self):
+        return self.__hdr_len__ + \
+               (self.len + 7) / 8
+
+    def __str__(self):
+        return self.pack_hdr() + \
+               self.data[:(self.len + 7) / 8]
+
+class RouteIPV6(dpkt.Packet):
+    __hdr__ = (
+        ('len', 'B', 0),
+        )
+
+    def unpack(self, buf):
+        dpkt.Packet.unpack(self, buf)
+        tmp = self.data[:(self.len + 7) / 8]
+        tmp += (16 - len(tmp)) * '\x00'
+        self.data = self.prefix = tmp
+
+    def __len__(self):
+        return self.__hdr_len__ + \
+               (self.len + 7) / 8
+
+    def __str__(self):
+        return self.pack_hdr() + \
+               self.data[:(self.len + 7) / 8]
 
 
 if __name__ == '__main__':
@@ -627,7 +679,7 @@ if __name__ == '__main__':
             self.failUnless(c.value == 1)
             r = b2.update.announced[0]
             self.failUnless(r.len == 22)
-            self.failUnless(r.prefix == '\xc0\xa8\x04')
+            self.failUnless(r.prefix == '\xc0\xa8\x04\x00')
 
             b3 = BGP(self.bgp3)
             self.failUnless(b3.type == UPDATE)
