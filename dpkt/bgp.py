@@ -48,10 +48,10 @@ AS_CONFED_SEQUENCE		= 3
 AS_CONFED_SET			= 4
 
 # Reserved Communities Types
-NO_EXPORT			= 0xffffff01
-NO_ADVERTISE			= 0xffffff02
-NO_EXPORT_SUBCONFED		= 0xffffff03
-NO_PEER				= 0xffffff04
+NO_EXPORT			= 0xffffff01L
+NO_ADVERTISE			= 0xffffff02L
+NO_EXPORT_SUBCONFED		= 0xffffff03L
+NO_PEER				= 0xffffff04L
 
 # Common AFI types
 AFI_IPV4			= 1
@@ -411,8 +411,8 @@ class BGP(dpkt.Packet):
                     l = []
                     while self.data:
                         val = struct.unpack('>I', self.data[:4])[0]
-                        if (val >= 0x00000000 and val <= 0x0000ffff) or \
-                           (val >= 0xffff0000 and val <= 0xffffffff):
+                        if (val >= 0x00000000L and val <= 0x0000ffffL) or \
+                           (val >= 0xffff0000L and val <= 0xffffffffL):
                             comm = self.ReservedCommunity(self.data[:4])
                         else:
                             comm = self.Community(self.data[:4])
