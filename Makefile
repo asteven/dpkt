@@ -1,8 +1,10 @@
 # $Id: Makefile 345 2006-02-01 15:47:16Z dugsong $
 
-PYTHON=	python
+PYTHON	= python
+#BDIST_MPKG= bdist_mpkg
+BDIST_MPKG= /Library/Frameworks/Python.framework/Versions/2.5/bin/bdist_mpkg
 PKGDIR  = dpkt-`egrep version dpkt/__init__.py | cut -f2 -d"'"`
-URL=	`egrep url dpkt/__init__.py | cut -f2 -d"'"`
+URL	= `egrep url dpkt/__init__.py | cut -f2 -d"'"`
 
 all:
 	$(PYTHON) setup.py build
@@ -20,13 +22,12 @@ pkg_win32:
 	$(PYTHON) setup.py bdist_wininst
 
 pkg_osx:
-	bdist_mpkg --readme=README --license=LICENSE
-	mv dist $(PKGDIR)
-	hdiutil create -srcfolder $(PKGDIR) $(PKGDIR).dmg
-	mv $(PKGDIR) dist
+	$(BDIST_MPKG) --readme=README --license=LICENSE
+	PKGNAME=`basename dist/*.mpkg | sed s/\.mpkg//` ; \
+	hdiutil create -srcfolder dist -volname $${PKGNAME} $${PKGNAME}.dmg
 
 clean:
-	rm -rf build dist doc
+	rm -rf build dist doc *.dmg
 
 cleandir distclean: clean
 	rm -f *.pyc *~ */*.pyc */*~
