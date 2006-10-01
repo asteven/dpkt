@@ -55,6 +55,25 @@ DNS_CHAOS = 3
 DNS_HESIOD = 4
 DNS_ANY = 255
 
+def pack_name(name, off, label_ptrs):
+    labels = name.split('.')
+    labels.append('')
+    buf = ''
+    for i, label in enumerate(labels):
+        key = '.'.join(labels[i:]).upper()
+        ptr = label_ptrs.get(key)
+        if not ptr:
+            if len(key) > 1:
+                ptr = off + len(buf)
+                if ptr < 0xc000:
+                    label_ptrs[key] = ptr
+            i = len(label)
+            buf += chr(i) + label
+        else:
+            buf += struct.pack('>H', (0xc000 | ptr))
+            break
+    return buf
+
 def unpack_name(buf, off):
     name = ''
     saved_off = 0
@@ -115,6 +134,7 @@ class DNS(dpkt.Packet):
             ('type', 'H', DNS_A),
             ('cls', 'H', DNS_IN)
             )
+        # XXX - suk
         def __len__(self):
             raise NotImplementedError
         __str__ = __len__
@@ -131,12 +151,46 @@ class DNS(dpkt.Packet):
             ('rlen', 'H', 4),
             ('rdata', 's', '')
             )
+        def pack_rdata(self, off, label_ptrs):
+            # XXX - yeah, this sux
+            if self.rdata:
+                return self.rdata
+            if self.type == DNS_A:
+                return self.ip
+            elif self.type == DNS_NS:
+                return pack_name(self.nsname, off, label_ptrs)
+            elif self.type == DNS_CNAME:
+                return pack_name(self.cname, off, label_ptrs)
+            elif self.type == DNS_PTR:
+                return pack_name(self.ptrname, off, label_ptrs)
+            elif self.type == DNS_SOA:
+                l = []
+                l.append(pack_name(self.mname, off, label_ptrs))
+                l.append(pack_name(self.rname, off + len(l[0]), label_ptrs))
+                l.append(struct.pack('>IIIII', self.serial, self.refresh,
+                                     self.retry, self.expire, self.minimum))
+                return ''.join(l)
+            elif self.type == DNS_MX:
+                return struct.pack('>H', self.preference) + \
+                       pack_name(self.mxname, off + 2, label_ptrs)
+            elif self.type == DNS_TXT or self.type == DNS_HINFO:
+                return ''.join([ '%s%s' % (chr(len(x)), x)
+                                 for x in self.text ])
+            elif self.type == DNS_AAAA:
+                return self.ip6
+            elif self.type == DNS_SRV:
+                return struct.pack('>HHH', self.priority, self.weight, self.port) + \
+                       pack_name(self.srvname, off + 6, label_ptrs)
+        
         def unpack_rdata(self, buf, off):
             if self.type == DNS_A:
                 self.ip = self.rdata
-            elif self.type == DNS_NS or self.type == DNS_CNAME or \
-                 self.type == DNS_PTR:
-                self.name, off = unpack_name(buf, off)
+            elif self.type == DNS_NS:
+                self.nsname, off = unpack_name(buf, off)
+            elif self.type == DNS_CNAME:
+                self.cname, off = unpack_name(buf, off)
+            elif self.type == DNS_PTR:
+                self.ptrname, off = unpack_name(buf, off)
             elif self.type == DNS_SOA:
                 self.mname, off = unpack_name(buf, off)
                 self.rname, off = unpack_name(buf, off)
@@ -144,7 +198,7 @@ class DNS(dpkt.Packet):
                     self.minimum = struct.unpack('>IIIII', buf[off:off+20])
             elif self.type == DNS_MX:
                 self.preference = struct.unpack('>H', self.rdata[:2])
-                self.exchange, off = unpack_name(buf, off+2)
+                self.mxname, off = unpack_name(buf, off+2)
             elif self.type == DNS_TXT or self.type == DNS_HINFO:
                 self.text = []
                 buf = self.rdata
@@ -157,59 +211,32 @@ class DNS(dpkt.Packet):
             elif self.type == DNS_SRV:
                 self.priority, self.weight, self.port = \
                     struct.unpack('>HHH', self.rdata[:6])
-                self.target, off = unpack_name(buf, off+6)
-    
-    def pack_name(self, buf, name):
-        """Append compressed DNS name and return buf."""
-        labels = name.split('.')
-        labels.append('')
-        for i, label in enumerate(labels):
-            key = '.'.join(labels[i:]).upper()
-            ptr = self.index.get(key, None)
-            if not ptr:
-                if len(key) > 1:
-                    ptr = len(buf)
-                    if ptr < 0xc000:
-                        self.index[key] = ptr
-                i = len(label)
-                buf += chr(i) + label
-            else:
-                buf += struct.pack('>H', (0xc000 | ptr))
-                break
-        return buf
-    
-    def unpack_name(self, buf, off):
-        """Return DNS name and new offset."""
-        return unpack_name(buf, off)
+                self.srvname, off = unpack_name(buf, off+6)
     
     def pack_q(self, buf, q):
         """Append packed DNS question and return buf."""
-        buf = self.pack_name(buf, q.name)
-        buf += struct.pack('>HH', q.type, q.cls)
-        return buf
-
-    def unpack_qd(self, buf, off):
+        return buf + pack_name(q.name, len(buf), self.label_ptrs) + \
+               struct.pack('>HH', q.type, q.cls)
+    
+    def unpack_q(self, buf, off):
         """Return DNS question and new offset."""
         q = self.Q()
-        q.name, off = self.unpack_name(buf, off)
+        q.name, off = unpack_name(buf, off)
         q.type, q.cls = struct.unpack('>HH', buf[off:off+4])
         off += 4
         return q, off
 
     def pack_rr(self, buf, rr):
         """Append packed DNS RR and return buf."""
-        buf = self.pack_name(buf, rr.name)
-        buf += struct.pack('>HHIH', rr.type, rr.cls, rr.ttl, len(rr.rdata))
-        if rr.type == DNS_PTR:
-            buf = self.pack_name(buf, rr.rdata)
-        else:
-            buf += rr.rdata
-        return buf
+        name = pack_name(rr.name, len(buf), self.label_ptrs)
+        rdata = rr.pack_rdata(len(buf) + len(name) + 10, self.label_ptrs)
+        return buf + name + struct.pack('>HHIH', rr.type, rr.cls, rr.ttl,
+                                        len(rdata)) + rdata
     
     def unpack_rr(self, buf, off):
         """Return DNS RR and new offset."""
         rr = self.RR()
-        rr.name, off = self.unpack_name(buf, off)
+        rr.name, off = unpack_name(buf, off)
         rr.type, rr.cls, rr.ttl, rdlen = struct.unpack('>HHIH', buf[off:off+10])
         off += 10
         rr.rdata = buf[off:off+rdlen]
@@ -223,8 +250,8 @@ class DNS(dpkt.Packet):
         cnt = self.qd
         self.qd = []
         for i in range(cnt):
-            qd, off = self.unpack_qd(buf, off)
-            self.qd.append(qd)
+            q, off = self.unpack_q(buf, off)
+            self.qd.append(q)
         for x in ('an', 'ns', 'ar'):
             cnt = getattr(self, x, 0)
             setattr(self, x, [])
@@ -239,15 +266,15 @@ class DNS(dpkt.Packet):
 
     def __str__(self):
         # XXX - compress names on the fly
-        self.index = {}
-        buf = struct.pack(self.__hdr_fmt__, self.id, self.op,
-                      len(self.qd), len(self.an), len(self.ns), len(self.ar))
+        self.label_ptrs = {}
+        buf = struct.pack(self.__hdr_fmt__, self.id, self.op, len(self.qd),
+                          len(self.an), len(self.ns), len(self.ar))
         for q in self.qd:
             buf = self.pack_q(buf, q)
         for x in ('an', 'ns', 'ar'):
             for rr in getattr(self, x):
                 buf = self.pack_rr(buf, rr)
-        del self.index
+        del self.label_ptrs
         return buf
 
 if __name__ == '__main__':
@@ -255,7 +282,7 @@ if __name__ == '__main__':
     from ip import IP
 
     class DNSTestCase(unittest.TestCase):
-        def test_DNS(self):
+        def test_basic(self):
             s = 'E\x00\x02\x08\xc15\x00\x00\x80\x11\x92aBk0\x01Bk0w\x005\xc07\x01\xf4\xda\xc2d\xd2\x81\x80\x00\x01\x00\x03\x00\x0b\x00\x0b\x03www\x06google\x03com\x00\x00\x01\x00\x01\xc0\x0c\x00\x05\x00\x01\x00\x00\x03V\x00\x17\x03www\x06google\x06akadns\x03net\x00\xc0,\x00\x01\x00\x01\x00\x00\x01\xa3\x00\x04@\xe9\xabh\xc0,\x00\x01\x00\x01\x00\x00\x01\xa3\x00\x04@\xe9\xabc\xc07\x00\x02\x00\x01\x00\x00KG\x00\x0c\x04usw5\x04akam\xc0>\xc07\x00\x02\x00\x01\x00\x00KG\x00\x07\x04usw6\xc0t\xc07\x00\x02\x00\x01\x00\x00KG\x00\x07\x04usw7\xc0t\xc07\x00\x02\x00\x01\x00\x00KG\x00\x08\x05asia3\xc0t\xc07\x00\x02\x00\x01\x00\x00KG\x00\x05\x02za\xc07\xc07\x00\x02\x00\x01\x00\x00KG\x00\x0f\x02zc\x06akadns\x03org\x00\xc07\x00\x02\x00\x01\x00\x00KG\x00\x05\x02zf\xc07\xc07\x00\x02\x00\x01\x00\x00KG\x00\x05\x02zh\xc0\xd5\xc07\x00\x02\x00\x01\x00\x00KG\x00\x07\x04eur3\xc0t\xc07\x00\x02\x00\x01\x00\x00KG\x00\x07\x04use2\xc0t\xc07\x00\x02\x00\x01\x00\x00KG\x00\x07\x04use4\xc0t\xc0\xc1\x00\x01\x00\x01\x00\x00\xfb4\x00\x04\xd0\xb9\x84\xb0\xc0\xd2\x00\x01\x00\x01\x00\x001\x0c\x00\x04?\xf1\xc76\xc0\xed\x00\x01\x00\x01\x00\x00\xfb4\x00\x04?\xd7\xc6S\xc0\xfe\x00\x01\x00\x01\x00\x001\x0c\x00\x04?\xd00.\xc1\x0f\x00\x01\x00\x01\x00\x00\n\xdf\x00\x04\xc1-\x01g\xc1"\x00\x01\x00\x01\x00\x00\x101\x00\x04?\xd1\xaa\x88\xc15\x00\x01\x00\x01\x00\x00\r\x1a\x00\x04PCC\xb6\xc0o\x00\x01\x00\x01\x00\x00\x10\x7f\x00\x04?\xf1I\xd6\xc0\x87\x00\x01\x00\x01\x00\x00\n\xdf\x00\x04\xce\x84dl\xc0\x9a\x00\x01\x00\x01\x00\x00\n\xdf\x00\x04A\xcb\xea\x1b\xc0\xad\x00\x01\x00\x01\x00\x00\x0b)\x00\x04\xc1l\x9a\t'
             ip = IP(s)
             dns = DNS(ip.udp.data)
@@ -265,4 +292,14 @@ if __name__ == '__main__':
             dns = DNS(s)
             self.failUnless(s == str(dns))
 
+        def test_PTR(self):
+            s = 'g\x02\x81\x80\x00\x01\x00\x01\x00\x03\x00\x00\x011\x011\x03211\x03141\x07in-addr\x04arpa\x00\x00\x0c\x00\x01\xc0\x0c\x00\x0c\x00\x01\x00\x00\r6\x00$\x07default\nv-umce-ifs\x05umnet\x05umich\x03edu\x00\xc0\x0e\x00\x02\x00\x01\x00\x00\r6\x00\r\x06shabby\x03ifs\xc0O\xc0\x0e\x00\x02\x00\x01\x00\x00\r6\x00\x0f\x0cfish-license\xc0m\xc0\x0e\x00\x02\x00\x01\x00\x00\r6\x00\x0b\x04dns2\x03itd\xc0O'
+            dns = DNS(s)
+            self.failUnless(dns.qd[0].name == '1.1.211.141.in-addr.arpa' and
+                            dns.an[0].ptrname == 'default.v-umce-ifs.umnet.umich.edu' and
+                            dns.ns[0].nsname == 'shabby.ifs.umich.edu' and
+                            dns.ns[1].ttl == 3382L and
+                            dns.ns[2].nsname == 'dns2.itd.umich.edu')
+            self.failUnless(s == str(dns))
+    
     unittest.main()
