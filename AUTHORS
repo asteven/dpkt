@@ -17,6 +17,7 @@ Tim Newsham <newsham@lava.net>
 Jon Oberheide <jon@oberheide.org>
 	STUN, H.225, and TPKT modules
 	NTP, RIP, Diameter, and SCTP modules
+	BGP and MRT modules
 
 Robert Stone <otaku@monkey.org>
 	Netflow and QQ modules

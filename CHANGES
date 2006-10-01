@@ -1,4 +1,10 @@
 
+dpkt-1.6:
+	- DNS RR packing fixed
+	- added STUN, H.225, TPKT, NTP, RIP, Diameter, SCTP,
+	  BGP, and MRT modules from Jon Oberheide
+	- new dpkt.NeedData exception
+
 dpkt-1.5:
 	- IP6 checksum fix
 	- __getitem__() interface to Packet (e.g. ip['src'] == ip.src)
