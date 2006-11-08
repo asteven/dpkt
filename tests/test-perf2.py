@@ -4,7 +4,7 @@ import dpkt
 import time, unittest
 
 class TestPerf(unittest.TestCase):
-    rounds = 100000
+    rounds = 10000
 
     def setUp(self):
         self.start = time.time()
