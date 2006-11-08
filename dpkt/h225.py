@@ -1,4 +1,4 @@
-# $Id: h225.py 271 2006-01-11 16:03:33Z dugsong $
+# $Id$
 
 """ITU-T H.225.0 Call Signaling."""
 

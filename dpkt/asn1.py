@@ -1,4 +1,4 @@
-# $Id: asn1.py 271 2006-01-11 16:03:33Z dugsong $
+# $Id$
 
 """Abstract Syntax Notation #1."""
 

@@ -1,4 +1,4 @@
-# $Id: pcap.py 371 2006-06-06 12:18:12Z dugsong $
+# $Id$
 
 """Libpcap file format."""
 

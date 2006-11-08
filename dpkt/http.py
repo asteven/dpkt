@@ -1,4 +1,4 @@
-# $Id: http.py 367 2006-05-08 19:34:50Z dugsong $
+# $Id$
 
 """Hypertext Transfer Protocol."""
 

@@ -1,4 +1,4 @@
-# $Id: ppp.py 363 2006-05-08 19:32:45Z dugsong $
+# $Id$
 
 """Point-to-Point Protocol."""
 

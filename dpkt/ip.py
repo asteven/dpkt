@@ -1,4 +1,4 @@
-# $Id: ip.py 385 2006-08-07 10:17:19Z dugsong $
+# $Id$
 
 """Internet Protocol."""
 

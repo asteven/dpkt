@@ -1,4 +1,4 @@
-# $Id: __init__.py 384 2006-08-04 00:39:44Z jonojono $
+# $Id$
 
 """fast, simple packet creation and parsing."""
 

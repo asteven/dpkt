@@ -1,4 +1,4 @@
-# $Id: cdp.py 366 2006-05-08 19:34:17Z dugsong $
+# $Id$
 
 """Cisco Discovery Protocol."""
 

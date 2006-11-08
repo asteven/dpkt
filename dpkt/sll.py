@@ -1,4 +1,4 @@
-# $Id: loopback.py 64 2005-01-26 19:13:17Z dugsong $
+# $Id$
 
 """Linux libpcap "cooked" capture encapsulation."""
 

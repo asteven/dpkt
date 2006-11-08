@@ -1,4 +1,4 @@
-# $Id: gre.py 342 2006-01-29 14:38:19Z dugsong $
+# $Id$
 
 """Generic Routing Encapsulation."""
 

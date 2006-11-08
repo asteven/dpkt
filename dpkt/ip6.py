@@ -1,4 +1,4 @@
-# $Id: ip6.py 359 2006-04-21 20:12:14Z dugsong $
+# $Id$
 
 """Internet Protocol, version 6."""
 

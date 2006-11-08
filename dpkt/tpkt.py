@@ -1,4 +1,4 @@
-# $Id: tpkt.py 271 2006-01-11 16:03:33Z dugsong $
+# $Id$
 
 """ISO Transport Service on top of the TCP (TPKT)."""
 

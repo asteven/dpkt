@@ -1,4 +1,4 @@
-# $Id: bgp.py 271 2006-01-11 16:03:33Z jonojono $
+# $Id$
 
 """Border Gateway Protocol."""
 

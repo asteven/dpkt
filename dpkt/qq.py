@@ -1,4 +1,4 @@
-# $Id: qq.py,v 1.1 2006/03/17 16:01:56 otaku Exp $
+# $Id$
 
 import struct
 from dpkt import Packet

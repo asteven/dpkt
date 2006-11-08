@@ -1,5 +1,5 @@
 
-# $Id: dpkt.py 372 2006-06-06 12:19:35Z dugsong $
+# $Id$
 
 """Simple packet creation and parsing."""
 

@@ -1,4 +1,4 @@
-# $Id: netbios.py 271 2006-01-11 16:03:33Z dugsong $
+# $Id$
 
 """Network Basic Input/Output System."""
 

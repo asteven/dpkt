@@ -1,4 +1,4 @@
-# $Id: ipx.py 358 2006-04-21 20:11:25Z dugsong $
+# $Id$
 
 """Internetwork Packet Exchange."""
 

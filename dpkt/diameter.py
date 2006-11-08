@@ -1,4 +1,4 @@
-# $Id: diameter.py 382 2006-07-31 04:07:52Z jonojono $
+# $Id$
 
 """Diameter."""
 

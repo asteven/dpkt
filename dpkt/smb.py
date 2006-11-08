@@ -1,4 +1,4 @@
-# $Id: smb.py 271 2006-01-11 16:03:33Z dugsong $
+# $Id$
 
 """Server Message Block."""
 

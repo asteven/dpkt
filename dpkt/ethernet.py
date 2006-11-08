@@ -1,4 +1,4 @@
-# $Id: ethernet.py 365 2006-05-08 19:34:00Z dugsong $
+# $Id$
 
 """Ethernet II, LLC (802.3+802.2), LLC/SNAP, and Novell raw 802.3,
 with automatic 802.1q, MPLS, PPPoE, and Cisco ISL decapsulation."""

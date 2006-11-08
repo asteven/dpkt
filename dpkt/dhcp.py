@@ -1,4 +1,4 @@
-# $Id: dhcp.py 272 2006-01-11 16:13:28Z dugsong $
+# $Id$
 
 """Dynamic Host Configuration Protocol."""
 

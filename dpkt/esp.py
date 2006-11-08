@@ -1,4 +1,4 @@
-# $Id: esp.py 290 2006-01-22 02:43:28Z dugsong $
+# $Id$
 
 """Encapsulated Security Protocol."""
 

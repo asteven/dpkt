@@ -1,4 +1,4 @@
-# $Id: netflow.py 370 2006-06-06 12:17:46Z dugsong $
+# $Id$
 
 """Cisco Netflow."""
 
