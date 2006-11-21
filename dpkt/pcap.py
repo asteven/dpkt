@@ -78,7 +78,7 @@ class Writer(object):
         s = str(pkt)
         n = len(s)
         ph = PktHdr(tv_sec=int(ts),
-                    tv_usec=int((int(ts) - float(ts)) * 1000000.0),
+                    tv_usec=int((float(ts) - int(ts)) * 1000000.0),
                     caplen=n, len=n)
         self.__f.write(str(ph))
         self.__f.write(s)
