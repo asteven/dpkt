@@ -56,7 +56,10 @@ DNS_HESIOD = 4
 DNS_ANY = 255
 
 def pack_name(name, off, label_ptrs):
-    labels = name.split('.')
+    if name:
+        labels = name.split('.')
+    else:
+        labels = []
     labels.append('')
     buf = ''
     for i, label in enumerate(labels):
@@ -302,4 +305,9 @@ if __name__ == '__main__':
                             dns.ns[2].nsname == 'dns2.itd.umich.edu')
             self.failUnless(s == str(dns))
     
+        def test_pack_name(self):
+            # Empty name is \0
+            x = pack_name('', 0, {})
+            self.assertEqual(x, '\0')
+
     unittest.main()
