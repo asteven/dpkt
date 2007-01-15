@@ -55,3 +55,13 @@ class BGP4MPMessage(dpkt.Packet):
         ('src_ip', 'I', 0),
         ('dst_ip', 'I', 0)
         )
+
+class BGP4MPMessage_32(dpkt.Packet):
+    __hdr__ = (
+        ('src_as', 'I', 0),
+        ('dst_as', 'I', 0),
+        ('intf', 'H', 0),
+        ('family', 'H', AFI_IPv4),
+        ('src_ip', 'I', 0),
+        ('dst_ip', 'I', 0)
+        )
