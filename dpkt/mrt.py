@@ -3,6 +3,7 @@
 """Multi-threaded Routing Toolkit."""
 
 import dpkt
+import bgp
 
 # Multi-threaded Routing Toolkit
 # http://www.ietf.org/internet-drafts/draft-ietf-grow-mrt-03.txt
@@ -45,6 +46,30 @@ class MRTHeader(dpkt.Packet):
         ('subtype', 'H', 0),
         ('len', 'I', 0)
         )
+
+class TableDump(dpkt.Packet):
+    __hdr__ = (
+        ('view', 'H', 0),
+        ('seq', 'H', 0),
+        ('prefix', 'I', 0),
+        ('prefix_len', 'B', 0),
+        ('status', 'B', 1),
+        ('originated_ts', 'I', 0),
+        ('peer_ip', 'I', 0),
+        ('peer_as', 'H', 0),
+        ('attr_len', 'H', 0)
+        )
+
+    def unpack(self, buf):
+        dpkt.Packet.unpack(self, buf)
+        plen = self.attr_len
+        l = []
+        while plen > 0:
+            attr = bgp.BGP.Update.Attribute(self.data)
+            self.data = self.data[len(attr):]
+            plen -= len(attr)
+            l.append(attr)
+        self.attributes = l
 
 class BGP4MPMessage(dpkt.Packet):
     __hdr__ = (
