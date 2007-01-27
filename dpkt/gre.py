@@ -70,7 +70,7 @@ class GRE(dpkt.Packet):
         if self.flags & GRE_RP:
             l = []
             while True:
-                sre = SRE(self.data)
+                sre = self.SRE(self.data)
                 l.append(sre)
                 if not sre.len:
                     break
