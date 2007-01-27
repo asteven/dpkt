@@ -15,8 +15,8 @@ class AH(dpkt.Packet):
     auth = ''
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
-        self.auth = self.data[:self.plen]
-        buf = self.data[self.plen:]
+        self.auth = self.data[:self.len]
+        buf = self.data[self.len:]
         try:
             self.data = ip.IP.get_proto(self.nxt)(buf)
             setattr(self, self.data.__class__.__name__.lower(), self.data)
