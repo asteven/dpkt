@@ -2,7 +2,7 @@
 
 """Authentication Header."""
 
-import dpkt
+import dpkt, ip
 
 class AH(dpkt.Packet):
     __hdr__ = (
