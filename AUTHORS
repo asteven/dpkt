@@ -17,6 +17,9 @@ David Helder <dhelder@gizmolabs.org>
 Przemyslaw Karwasiecki <karwas@gmail.com>
 	TABLE_DUMP in MRT module
 
+Jeff Nathan <jeff@snort.org>
+	bug fixes
+
 Tim Newsham <newsham@lava.net>
 	IPv6 bugfixing and improvements
 
