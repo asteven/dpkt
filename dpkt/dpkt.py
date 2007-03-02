@@ -3,7 +3,7 @@
 
 """Simple packet creation and parsing."""
 
-import copy, itertools, struct    
+import copy, itertools, struct
 
 class Error(Exception): pass
 class UnpackError(Error): pass
@@ -14,7 +14,10 @@ class _MetaPacket(type):
     def __new__(cls, clsname, clsbases, clsdict):
         t = type.__new__(cls, clsname, clsbases, clsdict)
         st = getattr(t, '__hdr__', None)
-        if st:
+        if st is not None:
+            # XXX - __slots__ only created in __new__()
+            clsdict['__slots__'] = [ x[0] for x in st ] + [ 'data' ]
+            t = type.__new__(cls, clsname, clsbases, clsdict)
             t.__hdr_fields__ = [ x[0] for x in st ]
             t.__hdr_fmt__ = getattr(t, '__byte_order__', '>') + \
                             ''.join([ x[1] for x in st ])
@@ -22,7 +25,7 @@ class _MetaPacket(type):
             t.__hdr_defaults__ = dict(zip(
                 t.__hdr_fields__, [ x[2] for x in st ]))
         return t
-                        
+
 class Packet(object):
     """Base packet class, with metaclass magic to generate members from
     self.__hdr__.
@@ -145,23 +148,19 @@ try:
     def in_cksum_add(s, buf):
         return dnet.ip_cksum_add(buf, s)
     def in_cksum_done(s):
-        return socket.ntohs(dnet.ip_cksum_carry(s)) & 0xffff
+        return socket.ntohs(dnet.ip_cksum_carry(s))
 except ImportError:
     import array
     def in_cksum_add(s, buf):
-        nleft = len(buf)
-        a = array.array('B', buf)
-        i = 0
-        while nleft > 1:
-            s += a[i] * 256 + a[i+1]
-            i += 2
-            nleft -= 2
-        if nleft:
-            s += a[i] * 256
-        return s
+        n = len(buf)
+        cnt = (n / 2) * 2
+        a = array.array('H', buf[:cnt])
+        if cnt != n:
+            a.append(struct.unpack('H', buf[-1] + '\x00')[0])
+        return sum(a)
     def in_cksum_done(s):
-        while (s >> 16):
-            s = (s >> 16) + (s & 0xffff)
+        s = (s >> 16) + (s & 0xffff)
+        s += (s >> 16)
         return (~s & 0xffff)
 
 def in_cksum(buf):
