@@ -3,7 +3,7 @@
 
 """Simple packet creation and parsing."""
 
-import copy, itertools, struct
+import copy, itertools, socket, struct
 
 class Error(Exception): pass
 class UnpackError(Error): pass
@@ -144,7 +144,7 @@ def hexdump(buf, length=16):
     return '\n'.join(res)
 
 try:
-    import dnet, socket
+    import dnet
     def in_cksum_add(s, buf):
         return dnet.ip_cksum_add(buf, s)
     def in_cksum_done(s):
@@ -157,11 +157,11 @@ except ImportError:
         a = array.array('H', buf[:cnt])
         if cnt != n:
             a.append(struct.unpack('H', buf[-1] + '\x00')[0])
-        return sum(a)
+        return s + sum(a)
     def in_cksum_done(s):
         s = (s >> 16) + (s & 0xffff)
         s += (s >> 16)
-        return (~s & 0xffff)
+        return socket.ntohs(~s & 0xffff)
 
 def in_cksum(buf):
     """Return computed Internet checksum."""
