@@ -32,21 +32,21 @@ class IP(dpkt.Packet):
         return self.__hdr_len__ + len(self.opts) + len(self.data)
     
     def __str__(self):
-        if not self.sum:
-            if self.p == 6 or self.p == 17 and \
-               isinstance(self.data, dpkt.Packet) and self.data.sum == 0 and \
-               self.off & (IP_MF|IP_OFFMASK) == 0:
-                try:
-                    # Set zeroed TCP and UDP checksums for non-fragments.
-                    s = dpkt.in_cksum_add(self.data.sum, self.src + self.dst)
-                    p = str(self.data)
-                    s = dpkt.in_cksum_add(s, p)
-                    self.data.sum = dpkt.in_cksum_done(s + self.p + len(p))
-                    if self.p == 17 and not self.data.sum:
-                        self.data.sum = 0xffff	# RFC 768
-                except AttributeError:
-                    pass
+        if self.sum == 0:
             self.sum = dpkt.in_cksum(self.pack_hdr())
+            if (self.p == 6 or self.p == 17) and \
+               (self.off & (IP_MF|IP_OFFMASK)) == 0 and \
+               isinstance(self.data, dpkt.Packet) and self.data.sum == 0:
+                # Set zeroed TCP and UDP checksums for non-fragments.
+                p = str(self.data)
+                s = dpkt.struct.pack('>4s4sxBH', self.src, self.dst,
+                                     self.p, len(p))
+                s = dpkt.in_cksum_add(0, s)
+                s = dpkt.in_cksum_add(s, p)
+                self.data.sum = dpkt.in_cksum_done(s)
+                if self.p == 17 and self.data.sum == 0:
+                    self.data.sum = 0xffff	# RFC 768
+                # XXX - skip transports which don't need the pseudoheader
         return self.pack_hdr() + self.opts + str(self.data)
     
     def unpack(self, buf):
