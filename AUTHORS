@@ -17,6 +17,9 @@ David Helder <dhelder@gizmolabs.org>
 Przemyslaw Karwasiecki <karwas@gmail.com>
 	TABLE_DUMP in MRT module
 
+Reza Lotun <rlotun@cs.ubc.ca>
+	MetaPacket cleanup
+
 Jeff Nathan <jeff@snort.org>
 	bug fixes
 
