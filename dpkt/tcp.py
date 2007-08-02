@@ -44,6 +44,8 @@ class TCP(dpkt.Packet):
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
         ol = ((self.off_x2 >> 4) << 2) - self.__hdr_len__
+        if ol < 0:
+            raise dpkt.UnpackError, 'invalid header length'
         self.opts = buf[self.__hdr_len__:self.__hdr_len__ + ol]
         self.data = buf[self.__hdr_len__ + ol:]
 
