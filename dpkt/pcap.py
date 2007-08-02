@@ -137,3 +137,16 @@ class Reader(object):
             hdr = self.__ph(buf)
             buf = self.__f.read(hdr.caplen)
             yield (hdr.tv_sec + (hdr.tv_usec / 1000000.0), buf)
+
+if __name__ == '__main__':
+    import unittest
+
+    class PcapTestCase(unittest.TestCase):
+        def test_endian(self):
+            be = '\xa1\xb2\xc3\xd4\x00\x02\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x60\x00\x00\x00\x01'
+            le = '\xd4\xc3\xb2\xa1\x02\x00\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x60\x00\x00\x00\x01\x00\x00\x00'
+            befh = FileHdr(be)
+            lefh = LEFileHdr(le)
+            self.failUnless(befh.linktype == lefh.linktype)
+
+    unittest.main()
