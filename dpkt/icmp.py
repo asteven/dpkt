@@ -103,7 +103,7 @@ class ICMP(dpkt.Packet):
             self.data = self._typesw[self.type](self.data)
             setattr(self, self.data.__class__.__name__.lower(), self.data)
         except (KeyError, dpkt.UnpackError):
-            self.data = buf
+            pass
 
     def __str__(self):
         if not self.sum:
