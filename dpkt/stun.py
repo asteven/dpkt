@@ -2,6 +2,7 @@
 
 """Simple Traversal of UDP through NAT."""
 
+import struct
 import dpkt
 
 # STUN - RFC 3489
