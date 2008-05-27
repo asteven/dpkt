@@ -19,8 +19,8 @@ class SSL2(dpkt.Packet):
             n = self.len = self.len & 0x3FFF
             padlen = ord(self.data[0])
             self.msg = self.data[1:1+n]
-            self.pad = self.data[1+n:1+n+pad]
-            self.data = self.data[1+n+pad:]
+            self.pad = self.data[1+n:1+n+padlen]
+            self.data = self.data[1+n+padlen:]
 
 # SSLv3/TLS version
 SSL3_VERSION = 0x0300
