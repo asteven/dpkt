@@ -1,6 +1,5 @@
 # $Id$
 
-import struct
 from dpkt import Packet
 
 # header_type

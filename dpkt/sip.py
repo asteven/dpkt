@@ -2,7 +2,7 @@
 
 """Session Initiation Protocol."""
 
-import dpkt, http
+import http
 
 class Request(http.Request):
     """SIP request."""
