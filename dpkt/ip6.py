@@ -47,10 +47,11 @@ class IP6(dpkt.Packet):
                not self.data.sum:
             # XXX - set TCP, UDP, and ICMPv6 checksums
             p = str(self.data)
-            s = dpkt.in_cksum_add(0, self.src + self.dst)
+            s = dpkt.struct.pack('>16s16sxBH', self.src, self.dst, self.nxt, len(p))
+            s = dpkt.in_cksum_add(0, s)
             s = dpkt.in_cksum_add(s, p)
             try:
-                self.data.sum = dpkt.in_cksum_done(s + self.nxt + len(p))
+                self.data.sum = dpkt.in_cksum_done(s)
             except AttributeError:
                 pass
         return dpkt.Packet.__str__(self)
