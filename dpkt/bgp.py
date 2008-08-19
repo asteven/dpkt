@@ -140,7 +140,7 @@ class BGP(dpkt.Packet):
     class Open(dpkt.Packet):
         __hdr__ = (
             ('v', 'B', 4),
-            ('as', 'H', 0),
+            ('asn', 'H', 0),
             ('holdtime', 'H', 0),
             ('identifier', 'I', 0),
             ('param_len', 'B', 0)
@@ -401,7 +401,7 @@ class BGP(dpkt.Packet):
 
             class Aggregator(dpkt.Packet):
                 __hdr__ = (
-                    ('as', 'H', 0),
+                    ('asn', 'H', 0),
                     ('ip', 'I', 0)
                 )
 
@@ -428,7 +428,7 @@ class BGP(dpkt.Packet):
 
                 class Community(dpkt.Packet):
                     __hdr__ = (
-                        ('as', 'H', 0),
+                        ('asn', 'H', 0),
                         ('value', 'H', 0)
                     )
 
