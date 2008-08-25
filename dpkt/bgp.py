@@ -3,7 +3,7 @@
 """Border Gateway Protocol."""
 
 import dpkt
-import struct
+import struct, socket
 
 # Border Gateway Protocol 4 - RFC 4271
 # Communities Attribute - RFC 1997
@@ -145,6 +145,9 @@ class BGP(dpkt.Packet):
             ('identifier', 'I', 0),
             ('param_len', 'B', 0)
             )
+        __hdr_defaults__ = {
+            'parameters': []
+            }
 
         def unpack(self, buf):
             dpkt.Packet.unpack(self, buf)
@@ -162,8 +165,9 @@ class BGP(dpkt.Packet):
                    sum(map(len, self.parameters))
 
         def __str__(self):
-            return self.pack_hdr() + \
-                   ''.join(map(str, self.parameters))
+            params = ''.join(map(str, self.parameters))
+            self.param_len = len(params)
+            return self.pack_hdr() + params
 
         class Parameter(dpkt.Packet):
             __hdr__ = (
@@ -197,6 +201,12 @@ class BGP(dpkt.Packet):
 
 
     class Update(dpkt.Packet):
+        __hdr_defaults__ = {
+            'withdrawn': [],
+            'attributes': [],
+            'announced': []
+            }
+
         def unpack(self, buf):
             self.data = buf
 
@@ -333,6 +343,10 @@ class BGP(dpkt.Packet):
                 )
 
             class ASPath(dpkt.Packet):
+                __hdr_defaults__ = {
+                    'segments': []
+                    }
+
                 def unpack(self, buf):
                     self.data = buf
                     l = []
@@ -406,6 +420,10 @@ class BGP(dpkt.Packet):
                 )
 
             class Communities(dpkt.Packet):
+                __hdr_defaults__ = {
+                    'list': []
+                    }
+
                 def unpack(self, buf):
                     self.data = buf
                     l = []
@@ -443,6 +461,10 @@ class BGP(dpkt.Packet):
                 )
 
             class ClusterList(dpkt.Packet):
+                __hdr_defaults__ = {
+                    'list': []
+                    }
+
                 def unpack(self, buf):
                     self.data = buf
                     l = []
@@ -607,13 +629,17 @@ class RouteIPV4(dpkt.Packet):
         tmp += (4 - len(tmp)) * '\x00'
         self.data = self.prefix = tmp
 
+    def __repr__(self):
+        cidr = '%s/%d' % (socket.inet_ntoa(self.prefix), self.len)
+        return '%s(%s)' % (self.__class__.__name__, cidr)
+
     def __len__(self):
         return self.__hdr_len__ + \
                (self.len + 7) / 8
 
     def __str__(self):
         return self.pack_hdr() + \
-               self.data[:(self.len + 7) / 8]
+               self.prefix[:(self.len + 7) / 8]
 
 class RouteIPV6(dpkt.Packet):
     __hdr__ = (
@@ -632,7 +658,7 @@ class RouteIPV6(dpkt.Packet):
 
     def __str__(self):
         return self.pack_hdr() + \
-               self.data[:(self.len + 7) / 8]
+               self.prefix[:(self.len + 7) / 8]
 
 
 if __name__ == '__main__':
@@ -675,7 +701,7 @@ if __name__ == '__main__':
             self.failUnless(a.len == 12)
             self.failUnless(len(a.communities.list) == 3)
             c = a.communities.list[0]
-            self.failUnless(c.as == 65215)
+            self.failUnless(c.asn == 65215)
             self.failUnless(c.value == 1)
             r = b2.update.announced[0]
             self.failUnless(r.len == 22)
@@ -712,7 +738,7 @@ if __name__ == '__main__':
             b4 = BGP(self.bgp4)
             self.failUnless(b4.len == 45)
             self.failUnless(b4.type == OPEN)
-            self.failUnless(b4.open.as == 237)
+            self.failUnless(b4.open.asn == 237)
             self.failUnless(b4.open.param_len == 16)
             self.failUnless(len(b4.open.parameters) == 3)
             p = b4.open.parameters[0]
