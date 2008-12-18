@@ -33,7 +33,7 @@ class IP(dpkt.Packet):
     
     def __str__(self):
         if self.sum == 0:
-            self.sum = dpkt.in_cksum(self.pack_hdr())
+            self.sum = dpkt.in_cksum(self.pack_hdr() + self.opts)
             if (self.p == 6 or self.p == 17) and \
                (self.off & (IP_MF|IP_OFFMASK)) == 0 and \
                isinstance(self.data, dpkt.Packet) and self.data.sum == 0:
@@ -281,4 +281,10 @@ if __name__ == '__main__':
             except dpkt.UnpackError:
                 pass
             
+        def test_opt(self):
+            s = '\x4f\x00\x00\x50\xae\x08\x00\x00\x40\x06\x17\xfc\xc0\xa8\x0a\x26\xc0\xa8\x0a\x01\x07\x27\x08\x01\x02\x03\x04\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            ip = IP(s)
+            ip.sum = 0
+            self.failUnless(str(ip) == s)
+
     unittest.main()
