@@ -46,6 +46,7 @@ import ppp
 import pppoe
 import qq
 import radius
+import rfb
 import rip
 import rpc
 import rtp
