@@ -29,6 +29,7 @@ import hsrp
 import http
 import icmp
 import icmp6
+import ieee80211
 import igmp
 import ip
 import ip6
