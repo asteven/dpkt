@@ -19,7 +19,13 @@ def parse_headers(f):
         if not l[0].endswith(':'):
             raise dpkt.UnpackError('invalid header: %r' % line)
         k = l[0][:-1].lower()
-        d[k] = len(l) != 1 and l[1] or ''
+        v = len(l) != 1 and l[1] or ''
+        if k in d:
+            if not type(d[k]) is list:
+                d[k] = [d[k]]
+            d[k].append(v)
+        else:
+            d[k] = v
     return d
 
 def parse_body(f, headers):
@@ -190,5 +196,11 @@ if __name__ == '__main__':
             assert r.version == '1.1'
             assert r.status == '200'
             assert r.reason == 'OK'
-            
+
+        def test_multicookie_response(self):
+            s = """HTTP/1.x 200 OK\r\nSet-Cookie: first_cookie=cookie1; path=/; domain=.example.com\r\nSet-Cookie: second_cookie=cookie2; path=/; domain=.example.com\r\nContent-Length: 0\r\n\r\n"""
+            r = Response(s)
+            assert type(r.headers['set-cookie']) is list
+            assert len(r.headers['set-cookie']) == 2
+
     unittest.main()
