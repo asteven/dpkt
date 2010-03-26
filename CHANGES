@@ -1,5 +1,7 @@
 
 dpkt-1.7:
+	- handle dynamic imports from py2exe/freeze.py/zipped egg
+	  packages, from plotnikoff
 	- decode Ethernet MPLS labels, Cisco ISL VLAN tags, 802.2 LLC fields
 	- handle multiply-defined HTTP headers from simdream
 	- add IPv6 extension header support (minus ESP) from Owen Stephens

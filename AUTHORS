@@ -32,7 +32,10 @@ Tim Newsham <newsham@lava.net>
 Jon Oberheide <jon@oberheide.org>
 	STUN, H.225, TPKT, NTP, RIP, Diameter, SCTP, BGP, MRT, RX modules
 
-simdream <simdream@gmail.com>
+plotnikoff@gmail.com
+	handle dynamic imports from py2exe/freeze.py/zipped egg packages
+
+simdream@gmail.com
 	handle multiple cookie values in HTTP
 
 Owen Stephens <owen@owenstephens.co.uk>
