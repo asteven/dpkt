@@ -48,16 +48,16 @@ class PPP(dpkt.Packet):
             raise dpkt.PackError(str(e))
 
 def __load_protos():
-    import os
-    d = dict.fromkeys([ x[:-3] for x in os.listdir(os.path.dirname(__file__) or '.') if x.endswith('.py') ])
     g = globals()
     for k, v in g.iteritems():
         if k.startswith('PPP_'):
             name = k[4:]
             modname = name.lower()
-            if modname in d:
+            try:
                 mod = __import__(modname, g)
-                PPP.set_p(v, getattr(mod, name))
+            except ImportError:
+                continue
+            PPP.set_p(v, getattr(mod, name))
 
 if not PPP._protosw:
     __load_protos()

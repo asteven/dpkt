@@ -113,16 +113,16 @@ class Ethernet(dpkt.Packet):
 
 # XXX - auto-load Ethernet dispatch table from ETH_TYPE_* definitions
 def __load_types():
-    import os
-    d = dict.fromkeys([ x[:-3] for x in os.listdir(os.path.dirname(__file__) or '.') if x.endswith('.py') ])
     g = globals()
     for k, v in g.iteritems():
         if k.startswith('ETH_TYPE_'):
             name = k[9:]
             modname = name.lower()
-            if modname in d:
+            try:
                 mod = __import__(modname, g)
-                Ethernet.set_type(v, getattr(mod, name))
+            except ImportError:
+                continue
+            Ethernet.set_type(v, getattr(mod, name))
 
 if not Ethernet._typesw:
     __load_types()

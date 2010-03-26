@@ -241,15 +241,15 @@ IP_PROTO_MAX		= 255
 
 # XXX - auto-load IP dispatch table from IP_PROTO_* definitions
 def __load_protos():
-    import os
-    d = dict.fromkeys([ x[:-3] for x in os.listdir(os.path.dirname(__file__) or '.') if x.endswith('.py') ])
     g = globals()
     for k, v in g.iteritems():
         if k.startswith('IP_PROTO_'):
             name = k[9:].lower()
-            if name in d:
+            try:
                 mod = __import__(name, g)
-                IP.set_proto(v, getattr(mod, name.upper()))
+            except ImportError:
+                continue
+            IP.set_proto(v, getattr(mod, name.upper()))
 
 if not IP._protosw:
     __load_protos()
