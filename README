@@ -2,9 +2,9 @@
 dpkt
 ----
 
-fast, simple packet creation and parsing.
+Fast, simple packet creation and parsing.
 
--d.
+We have no docs, but only sample code (see examples/) for now.
 
 ---
-http://monkey.org/~dugsong/dpkt/
+http://dpkt.googlecode.com/
