@@ -1,4 +1,22 @@
 
+dpkt-1.7:
+	- handle multiply-defined HTTP headers from simdream
+	- add IPv6 extension header support (minus ESP) from Owen Stephens
+	- add radiotap module from Timur Alperovich
+	- add IEEE80211 module from Jon Oberheide
+	- add RFB module from Jon Oberheide
+	- fix IP6 checksum to include options
+	- rename 'as' to 'asn' field in BGP header
+	- fix transport-layer checksum in IP6
+	- handle improper TCP header offset
+	- fix SSL typo
+	- handle malformed ICMP headers
+	- added RX module from Jon Oberheide
+	- fixed loopback module IP/IP6 decoding
+	- set transport-layer (TCP, UDP) checksum in IP
+	- MRT module fixes
+	- fix pcap.Writer timestamp calculation
+
 dpkt-1.6:
 	- DNS RR packing fixed
 	- added STUN, H.225, TPKT, NTP, RIP, Diameter, SCTP,
