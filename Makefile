@@ -2,7 +2,7 @@
 
 PYTHON	= python
 #BDIST_MPKG= bdist_mpkg
-BDIST_MPKG= /Library/Frameworks/Python.framework/Versions/2.5/bin/bdist_mpkg
+BDIST_MPKG= /System/Library/Frameworks/Python.framework/Versions/2.6/Extras/bin/bdist_mpkg
 PKGDIR  = dpkt-`egrep version dpkt/__init__.py | cut -f2 -d"'"`
 URL	= `egrep url dpkt/__init__.py | cut -f2 -d"'"`
 
