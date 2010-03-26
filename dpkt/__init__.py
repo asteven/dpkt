@@ -5,8 +5,8 @@
 __author__ = 'Dug Song <dugsong@monkey.org>'
 __copyright__ = 'Copyright (c) 2004 Dug Song'
 __license__ = 'BSD'
-__url__ = 'http://monkey.org/~dugsong/dpkt/'
-__version__ = '1.6'
+__url__ = 'http://dpkt.googlecode.com/'
+__version__ = '1.7'
 
 from dpkt import *
 
