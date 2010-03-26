@@ -31,6 +31,15 @@ ETH_TYPE_MPLS_MCAST	= 0x8848	# MPLS Multicast
 ETH_TYPE_PPPoE_DISC	= 0x8863	# PPP Over Ethernet Discovery Stage
 ETH_TYPE_PPPoE		= 0x8864	# PPP Over Ethernet Session Stage
 
+# MPLS label stack fields
+MPLS_LABEL_MASK	= 0xfffff000
+MPLS_QOS_MASK	= 0x00000e00
+MPLS_TTL_MASK	= 0x000000ff
+MPLS_LABEL_SHIFT= 12
+MPLS_QOS_SHIFT	= 9
+MPLS_TTL_SHIFT	= 0
+MPLS_STACK_BOTTOM=0x0100
+
 class Ethernet(dpkt.Packet):
     __hdr__ = (
         ('dst', '6s', ''),
@@ -45,9 +54,15 @@ class Ethernet(dpkt.Packet):
             buf = buf[4:]
         elif self.type == ETH_TYPE_MPLS or \
              self.type == ETH_TYPE_MPLS_MCAST:
-            # XXX - skip labels
+            # XXX - skip labels (max # of labels is undefined, just use 24)
+            self.labels = []
             for i in range(24):
-                if struct.unpack('>I', buf[i:i+4])[0] & 0x0100: # MPLS_STACK_BOTTOM
+                entry = struct.unpack('>I', buf[i*4:i*4+4])[0]
+                label = ((entry & MPLS_LABEL_MASK) >> MPLS_LABEL_SHIFT, \
+                         (entry & MPLS_QOS_MASK) >> MPLS_QOS_SHIFT, \
+                         (entry & MPLS_TTL_MASK) >> MPLS_TTL_SHIFT)
+                self.labels.append(label)
+                if entry & MPLS_STACK_BOTTOM:
                     break
             self.type = ETH_TYPE_IP
             buf = buf[(i + 1) * 4:]
@@ -65,7 +80,7 @@ class Ethernet(dpkt.Packet):
         elif self.dst.startswith('\x01\x00\x0c\x00\x00') or \
              self.dst.startswith('\x03\x00\x0c\x00\x00'):
             # Cisco ISL
-            #self.vlan = struct.unpack('>H', self.data[6:8])[0]
+            self.vlan = struct.unpack('>H', self.data[6:8])[0]
             self.unpack(self.data[12:])
         elif self.data.startswith('\xff\xff'):
             # Novell "raw" 802.3
@@ -73,7 +88,7 @@ class Ethernet(dpkt.Packet):
             self.data = self.ipx = self._typesw[ETH_TYPE_IPX](self.data[2:])
         else:
             # 802.2 LLC
-            #self.dsap, self.ssap, self.ctl = struct.unpack('BBB', self.data[:3])
+            self.dsap, self.ssap, self.ctl = struct.unpack('BBB', self.data[:3])
             if self.data.startswith('\xaa\xaa'):
                 # SNAP
                 self.type = struct.unpack('>H', self.data[6:8])[0]
