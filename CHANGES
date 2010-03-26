@@ -1,5 +1,6 @@
 
 dpkt-1.7:
+	- decode Ethernet MPLS labels, Cisco ISL VLAN tags, 802.2 LLC fields
 	- handle multiply-defined HTTP headers from simdream
 	- add IPv6 extension header support (minus ESP) from Owen Stephens
 	- add radiotap module from Timur Alperovich
