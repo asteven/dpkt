@@ -11,6 +11,9 @@ Contributors
 Timur Alperovich <timuralp@umich.edu>
 	radiotap module
 
+Nic Bellamy <nic.bellamy@vadacom.co.nz>
+	HTTP header parsing fix
+
 the grugq <thegrugq@gmail.com>
 	better RTP module
 
