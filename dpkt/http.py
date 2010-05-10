@@ -15,11 +15,11 @@ def parse_headers(f):
         line = line.strip()
         if not line:
             break
-        l = line.split(None, 1)
-        if not l[0].endswith(':'):
+        l = line.split(':', 1)
+        if len(l[0].split()) != 1:
             raise dpkt.UnpackError('invalid header: %r' % line)
-        k = l[0][:-1].lower()
-        v = len(l) != 1 and l[1] or ''
+        k = l[0].lower()
+        v = len(l) != 1 and l[1].lstrip() or ''
         if k in d:
             if not type(d[k]) is list:
                 d[k] = [d[k]]
