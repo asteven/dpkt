@@ -71,12 +71,11 @@ class GRE(dpkt.Packet):
             l = []
             while True:
                 sre = self.SRE(self.data)
+                self.data = self.data[len(sre):]
                 l.append(sre)
                 if not sre.len:
                     break
             self.sre = l
-            skip = sum(map(len, self.sre))
-            self.data = self.data[skip:]
         self.data = ethernet.Ethernet._typesw[self.p](self.data)
         setattr(self, self.data.__class__.__name__.lower(), self.data)
     
