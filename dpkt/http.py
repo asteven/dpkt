@@ -125,12 +125,19 @@ class Request(Message):
         f = cStringIO.StringIO(buf)
         line = f.readline()
         l = line.strip().split()
-        if len(l) != 3 or l[0] not in self.__methods or \
-           not l[2].startswith(self.__proto):
+        if len(l) < 2:
             raise dpkt.UnpackError('invalid request: %r' % line)
+        if l[0] not in self.__methods:
+            raise dpkt.UnpackError('invalid http method: %r' % l[0])
+        if len(l) == 2:
+            # HTTP/0.9 does not specify a version in the request line
+            self.version = '0.9'
+        else:
+            if not l[2].startswith(self.__proto):
+                raise dpkt.UnpackError('invalid http version: %r' % l[2])
+            self.version = l[2][len(self.__proto)+1:]
         self.method = l[0]
         self.uri = l[1]
-        self.version = l[2][len(self.__proto)+1:]
         Message.unpack(self, f.read())
 
     def __str__(self):
@@ -202,5 +209,25 @@ if __name__ == '__main__':
             r = Response(s)
             assert type(r.headers['set-cookie']) is list
             assert len(r.headers['set-cookie']) == 2
+
+        def test_request_version(self):
+            s = """GET / HTTP/1.0\r\n\r\n"""
+            r = Request(s)
+            assert r.method == 'GET'
+            assert r.uri == '/'
+            assert r.version == '1.0'
+
+            s = """GET /\r\n\r\n"""
+            r = Request(s)
+            assert r.method == 'GET'
+            assert r.uri == '/'
+            assert r.version == '0.9'
+
+            s = """GET / CHEESE/1.0\r\n\r\n"""
+            try:
+                r = Request(s)
+                assert "invalid protocol version parsed!"
+            except:
+                pass
 
     unittest.main()
