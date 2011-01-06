@@ -32,6 +32,9 @@ Jeff Nathan <jeff@snort.org>
 Tim Newsham <newsham@lava.net>
 	IPv6 bugfixing and improvements
 
+keisuke.nishimoto@gmail.com
+	Snoop file parser
+
 Jon Oberheide <jon@oberheide.org>
 	STUN, H.225, TPKT, NTP, RIP, Diameter, SCTP, BGP, MRT, RX modules
 
