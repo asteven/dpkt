@@ -70,7 +70,10 @@ class Writer(object):
     """Simple pcap dumpfile writer."""
     def __init__(self, fileobj, snaplen=1500, linktype=DLT_EN10MB):
         self.__f = fileobj
-        fh = FileHdr(snaplen=snaplen, linktype=linktype)
+        if sys.byteorder == 'little':
+            fh = LEFileHdr(snaplen=snaplen, linktype=linktype)
+        else:
+            fh = FileHdr(snaplen=snaplen, linktype=linktype)
         self.__f.write(str(fh))
 
     def writepkt(self, pkt, ts=None):
@@ -78,7 +81,12 @@ class Writer(object):
             ts = time.time()
         s = str(pkt)
         n = len(s)
-        ph = PktHdr(tv_sec=int(ts),
+        if sys.byteorder == 'little':
+            ph = LEPktHdr(tv_sec=int(ts),
+                    tv_usec=int((float(ts) - int(ts)) * 1000000.0),
+                    caplen=n, len=n)
+        else:
+            ph = PktHdr(tv_sec=int(ts),
                     tv_usec=int((float(ts) - int(ts)) * 1000000.0),
                     caplen=n, len=n)
         self.__f.write(str(ph))
