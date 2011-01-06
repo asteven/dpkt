@@ -118,7 +118,7 @@ OUT_OF_RESOURCES		= 8
 
 class BGP(dpkt.Packet):
     __hdr__ = (
-        ('marker', '16s', '\x01' * 16),
+        ('marker', '16s', '\xff' * 16),
         ('len', 'H', 0),
         ('type', 'B', OPEN)
         )
