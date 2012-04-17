@@ -11,6 +11,7 @@ OP_WRQ     = 2    # write request
 OP_DATA    = 3    # data packet
 OP_ACK     = 4    # acknowledgment
 OP_ERR     = 5    # error code
+OP_OACK    = 6    # option acknowledgment
 
 # Error codes
 EUNDEF     = 0    # not defined
@@ -21,6 +22,7 @@ EBADOP     = 4    # illegal TFTP operation
 EBADID     = 5    # unknown transfer ID
 EEXISTS    = 6    # file already exists
 ENOUSER    = 7    # no such user
+EOPTNEG    = 8    # option negotiation
 
 class TFTP(dpkt.Packet):
     __hdr__ = (('opcode', 'H', 1), )
@@ -28,9 +30,12 @@ class TFTP(dpkt.Packet):
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
         if self.opcode in (OP_RRQ, OP_WRQ):
-            l = self.data.split('\x00')
-            self.filename = l[0]
-            self.mode = l[1]
+            (self.filename,self.mode,rfc2347str) = self.data.split('\x00', 2)
+            if rfc2347str:
+                option_list = rfc2347str[:-1].split('\x00')
+                self.options = dict(zip(option_list[:-1:2], option_list[1::2]))
+            else:
+                self.options = dict()
             self.data = ''
         elif self.opcode in (OP_DATA, OP_ACK):
             self.block = struct.unpack('>H', self.data[:2])
@@ -50,6 +55,11 @@ class TFTP(dpkt.Packet):
             s = struct.pack('>H', self.block)
         elif self.opcode == OP_ERR:
             s = struct.pack('>H', self.errcode) + ('%s\x00' % self.errmsg)
+        elif self.opcode == OP_OACK:
+            if self.options:
+                s = '\x00'.join(['\x00'.join(item) for item in d.items()]) + '\x00'
+            else:
+                s = '\x00'
         else:
             s = ''
         return self.pack_hdr() + s + self.data
