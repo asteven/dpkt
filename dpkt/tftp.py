@@ -57,7 +57,7 @@ class TFTP(dpkt.Packet):
             s = struct.pack('>H', self.errcode) + ('%s\x00' % self.errmsg)
         elif self.opcode == OP_OACK:
             if self.options:
-                s = '\x00'.join(['\x00'.join(item) for item in d.items()]) + '\x00'
+                s = '\x00'.join(['\x00'.join(item) for item in self.options.items()]) + '\x00'
             else:
                 s = '\x00'
         else:
