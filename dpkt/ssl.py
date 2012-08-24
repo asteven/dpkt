@@ -260,10 +260,8 @@ class TLSServerHello(dpkt.Packet):
             dpkt.Packet.unpack(self, buf)
             self.session_id, pointer = parse_variable_array(self.data, 1)
             # single cipher suite
-            cipher_suite = struct.unpack('!H', self.data[pointer:pointer+2])[0]
+            self.cipher_suite = struct.unpack('!H', self.data[pointer:pointer+2])[0]
             pointer += 2
-            self.cipher_suite = ssl_ciphersuites.BY_CODE.get(cipher_suite,
-                                                             cipher_suite)
             # single compression method
             self.compression = struct.unpack('!B', self.data[pointer:pointer+1])[0]
             pointer += 1

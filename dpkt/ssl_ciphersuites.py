@@ -72,3 +72,5 @@ BY_CODE = dict(
 
 BY_NAME = dict(
     (suite.name, suite) for suite in CIPHERSUITES)
+
+NULL_SUITE = BY_CODE[0x00]
