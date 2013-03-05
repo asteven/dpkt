@@ -26,7 +26,7 @@ class VRRP(dpkt.Packet):
         return self.vtype & 0xf
     def _set_type(self, v):
         self.vtype = (self.vtype & ~0xf0) | (v & 0xf)
-    type = property(_get_v, _set_v)
+    type = property(_get_type, _set_type)
     
     def unpack(self, buf):
         dpkt.Packet.unpack(self, buf)
