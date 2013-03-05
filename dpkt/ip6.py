@@ -41,7 +41,10 @@ class IP6(dpkt.Packet):
         dpkt.Packet.unpack(self, buf)
         self.extension_hdrs = dict(((i, None) for i in ext_hdrs))
         
-        buf = self.data[:self.plen]
+        if self.plen:
+            buf = self.data[:self.plen]
+        else:  # due to jumbo payload or TSO
+            buf = self.data
         
         next = self.nxt
         
